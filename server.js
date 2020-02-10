@@ -1,5 +1,22 @@
 let express = require('express');
+let mongodb = require('mongodb');
 let app = express();
+let db;
+
+let connectionString =
+  'mongodb+srv://<user:pw_mustBeReplaced>@<cluster_mustBeReplaced>.mongodb.net/TodoApp?retryWrites=true&w=majority';
+mongodb.connect(
+  connectionString,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  },
+  (err, client) => {
+    console.log('connect err', err);
+    db = client.db();
+    app.listen(3000);
+  }
+);
 
 // configure express that all form controls are added to a body object
 // and then add the body object to the request object
@@ -62,8 +79,8 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-item', (req, res) => {
-  console.log('selected item: ', req.body.item);
-  res.send('Thank you for submitting the form');
+  db.collection('items').insertOne({ text: req.body.item }, err => {
+    res.send('Thank you for submitting the form');
+    console.log('insertOne', err);
+  });
 });
-
-app.listen(3000);
