@@ -3,6 +3,10 @@ let mongodb = require('mongodb');
 let app = express();
 let db;
 
+// define middleware for accessing static files from folder public
+// you can choose whatever name you like for the folder
+app.use(express.static('public'));
+
 // TODO: change connectionString before commit to GitHub
 let connectionString =
   'mongodb+srv://<user:pw_mustBeReplaced>@<cluster_mustBeReplaced>.mongodb.net/TodoApp?retryWrites=true&w=majority';
@@ -18,6 +22,10 @@ mongodb.connect(
     app.listen(3000);
   }
 );
+
+// define middleware for async requests as json objects
+// used by axios async http requests
+app.use(express.json());
 
 // configure express that all form controls are added to a body object
 // and then add the body object to the request object
@@ -68,6 +76,8 @@ app.get('/', (req, res) => {
     
   </div>
   
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="/browser.js"></script>
 </body>
 </html>
   `);
@@ -78,4 +88,9 @@ app.post('/create-item', (req, res) => {
   db.collection('items').insertOne({ text: req.body.item }, err => {
     res.redirect('/');
   });
+});
+
+app.post('/update-item', (req, res) => {
+  console.log('ready for update in db - changed todo: ', req.body.text);
+  res.send('success');
 });
