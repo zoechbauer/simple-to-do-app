@@ -9,6 +9,14 @@ function itemTemplate(item) {
   </li>`;
 }
 
+// initial page load render
+let ourHTML = items
+  .map(item => {
+    return itemTemplate(item);
+  })
+  .join('');
+document.getElementById('item-list').insertAdjacentHTML('beforeend', ourHTML);
+
 // create feature
 let createField = document.getElementById('create-field');
 document.getElementById('create-form').addEventListener('submit', e => {
@@ -20,6 +28,9 @@ document.getElementById('create-form').addEventListener('submit', e => {
       document
         .getElementById('item-list')
         .insertAdjacentHTML('beforeend', itemTemplate(response.data));
+      // clear input
+      createField.value = '';
+      createField.focus();
     })
     .catch(e => {
       console.log('err: ', e);
