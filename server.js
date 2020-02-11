@@ -67,7 +67,7 @@ app.get('/', (req, res) => {
             <span class="item-text">${item.text}</span>
             <div>
               <button data-id="${item._id}" class="edit-me btn btn-secondary btn-sm mr-1">Edit</button>
-              <button class="delete-me btn btn-danger btn-sm">Delete</button>
+              <button data-id="${item._id}" class="delete-me btn btn-danger btn-sm">Delete</button>
             </div>
           </li>`;
         })
@@ -95,5 +95,14 @@ app.post('/update-item', (req, res) => {
     { _id: new mongodb.ObjectId(req.body.id) },
     { $set: { text: req.body.text } },
     () => res.send('success')
+  );
+});
+
+app.post('/delete-item', (req, res) => {
+  db.collection('items').deleteOne(
+    { _id: new mongodb.ObjectId(req.body.id) },
+    () => {
+      res.send('success');
+    }
   );
 });
