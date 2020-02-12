@@ -1,5 +1,6 @@
 let express = require('express');
 let mongodb = require('mongodb');
+let sanitizeHTML = require('sanitize-html');
 let app = express();
 let db;
 
@@ -32,6 +33,19 @@ app.use(express.json());
 // by default express does not do this.
 // so it makes it very easy to access form data, eg. request.body.item
 app.use(express.urlencoded({ extended: false }));
+
+// use passwordRestricted in all http functions
+app.use(passwordRestricted);
+
+function passwordRestricted(req, res, next) {
+  res.set('WWW-Authenticate', 'Basic realm = "Simple Todo App"');
+  console.log('authorization: ', req.headers.authorization);
+  if (req.headers.authorization == 'Basic bGVhcm46amF2YXNjcmlwdA==') {
+    next();
+  } else {
+    res.status(401).send('Authentication required');
+  }
+}
 
 app.get('/', (req, res) => {
   db.collection('items')
@@ -88,16 +102,24 @@ app.get('/', (req, res) => {
 // create item with async axios http request
 //   http request data: { text: value}
 app.post('/create-item', (req, res) => {
-  db.collection('items').insertOne({ text: req.body.text }, (err, info) => {
+  let safeText = sanitizeHTML(req.body.text, {
+    allowedTags: [],
+    allowedAttributes: {}
+  });
+  db.collection('items').insertOne({ text: safeText }, (err, info) => {
     // console.log('info.ops[0]: ', info.ops[0]);
     res.json(info.ops[0]);
   });
 });
 
 app.post('/update-item', (req, res) => {
+  let safeText = sanitizeHTML(req.body.text, {
+    allowedTags: [],
+    allowedAttributes: {}
+  });
   db.collection('items').findOneAndUpdate(
     { _id: new mongodb.ObjectId(req.body.id) },
-    { $set: { text: req.body.text } },
+    { $set: { text: safeText } },
     () => res.send('success')
   );
 });
