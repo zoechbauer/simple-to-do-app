@@ -4,6 +4,11 @@ let sanitizeHTML = require('sanitize-html');
 let app = express();
 let db;
 
+let port = process.env.PORT;
+if (port == null || port == '') {
+  port = 3000;
+}
+
 // define middleware for accessing static files from folder public
 // you can choose whatever name you like for the folder
 app.use(express.static('public'));
@@ -20,7 +25,7 @@ mongodb.connect(
   (err, client) => {
     console.log('connect err', err);
     db = client.db();
-    app.listen(3000);
+    app.listen(port);
   }
 );
 
